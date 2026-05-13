@@ -1,0 +1,33 @@
+$:
+  vscode:
+    - runner:
+        cpus: 8
+      docker:
+        build:
+          dockerfile: Dockerfile
+      env:
+        ROOT_PASSWORD: "147258369xingsha"
+        GIT_USER_NAME: "XyzenSun"
+        GIT_USER_EMAIL: "xyzen@ik.me"
+        # ===== 对象存储持久化配置 =====
+        OSS_ENABLED: "true"
+        OSS_ENDPOINT: "https://s3.bitiful.net"
+        # 请填入 Access Key ID
+        OSS_ACCESS_KEY: "T3f8C94KYDDFaf432CPz0GCd"
+        # 请填入 Secret Access Key
+        OSS_SECRET_KEY: "JL7d0KATDlviEJzrGnBnFcvpQJKlNgk"
+        # 请填入桶名
+        OSS_BUCKET: "19049573241"
+        OSS_REGION: "auto"
+        OSS_PROJECT: "cnb_vibespace"
+        OSS_PATHS: "/root/.claude,/root/.cc-switch,/root/.local/share/code-server/User/globalStorage,/root/.vscode-server/data/User/globalStorage,/root/.ssh"
+        OSS_KEEP_COUNT: "2"
+        OSS_SYNC_INTERVAL: "120"
+      services:
+        - docker
+        - name: vscode
+          options:
+            keepAliveTimeout: 1080m
+      stages:
+        - name: run entrypoint.sh
+          script: chmod +x /usr/local/bin/entrypoint.sh && /usr/local/bin/entrypoint.sh
