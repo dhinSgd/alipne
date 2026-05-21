@@ -20,7 +20,7 @@ $:
         OSS_BUCKET: "19049573241"
         OSS_REGION: "auto"
         OSS_PROJECT: "cnb_vibespace"
-        OSS_PATHS: "/root/.claude,/root/.cc-switch,/root/.local/share/code-server/User/globalStorage,/root/.vscode-server/data/User/globalStorage,/root/.ssh"
+        OSS_PATHS: "/root/.claude.json,/root/.claude,/root/.cc-switch,/root/.local/share/code-server/User/globalStorage,/root/.vscode-server/data/User/globalStorage,/root/.ssh"
         OSS_KEEP_COUNT: "2"
         OSS_SYNC_INTERVAL: "120"
       services:
