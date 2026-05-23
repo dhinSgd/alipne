@@ -1,0 +1,15 @@
+#!/bin/sh
+# DNS 回退脚本：如果 DHCP 未提供 DNS，使用 Cloudflare + Google
+
+RESOLV_CONF="/etc/resolv.conf"
+FALLBACK_DNS="1.1.1.1 8.8.8.8 1.0.0.1 8.8.4.4"
+
+# 检查 resolv.conf 是否有有效的 nameserver
+if ! grep -q "^nameserver" "$RESOLV_CONF" 2>/dev/null; then
+    echo "# DHCP 未提供 DNS，使用回退 DNS 服务器" > "$RESOLV_CONF"
+    for dns in $FALLBACK_DNS; do
+        echo "nameserver $dns" >> "$RESOLV_CONF"
+    done
+    echo "options edns0 single-request-reopen" >> "$RESOLV_CONF"
+    logger -t udhcpc "DHCP 未提供 DNS，已配置回退 DNS: $FALLBACK_DNS"
+fi
