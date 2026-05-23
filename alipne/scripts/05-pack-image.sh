@@ -15,8 +15,9 @@ echo "==> 转换镜像格式 (raw -> qcow2)..."
 # 删除旧的 qcow2 镜像
 rm -f "$QCOW2_IMAGE"
 
-# 转换并压缩
-qemu-img convert -f raw -O qcow2 -c -o compression_type=zstd \
+# 转换并压缩（使用标准 zlib 压缩，兼容阿里云）
+# 注意：不使用 compression_type=zstd，阿里云不支持
+qemu-img convert -f raw -O qcow2 -c \
     "$RAW_IMAGE" "$QCOW2_IMAGE"
 
 echo "==> 镜像信息..."
