@@ -76,16 +76,44 @@ ALPINE_MIRROR="https://dl-cdn.alpinelinux.org/alpine"
 ALPINE_VERSION="v3.20"
 ALPINE_ARCH="x86_64"
 
-# 下载并解压 apk-tools-static
-if [ ! -f /tmp/apk-tools-static.apk ]; then
-    wget -O /tmp/apk-tools-static.apk \
-        "$ALPINE_MIRROR/$ALPINE_VERSION/main/$ALPINE_ARCH/apk-tools-static-2.14.4-r0.apk" || \
-    wget -O /tmp/apk-tools-static.apk \
-        "$ALPINE_MIRROR/$ALPINE_VERSION/main/$ALPINE_ARCH/$(wget -qO- "$ALPINE_MIRROR/$ALPINE_VERSION/main/$ALPINE_ARCH/" | grep -o 'apk-tools-static-[0-9].*\.apk' | head -1)"
+# 从 APKINDEX 动态获取最新的 apk-tools-static 版本号
+echo "==> 获取最新的 apk-tools-static 版本..."
+rm -rf /tmp/apkindex
+mkdir -p /tmp/apkindex
+wget -q -O /tmp/apkindex/APKINDEX.tar.gz \
+    "$ALPINE_MIRROR/$ALPINE_VERSION/main/$ALPINE_ARCH/APKINDEX.tar.gz"
+tar -xzf /tmp/apkindex/APKINDEX.tar.gz -C /tmp/apkindex
+
+# 解析 APKINDEX 找到 apk-tools-static 的版本
+APK_TOOLS_VERSION=$(awk '
+    /^P:apk-tools-static$/ { found=1; next }
+    found && /^V:/ { sub(/^V:/, ""); print; exit }
+' /tmp/apkindex/APKINDEX)
+
+if [ -z "$APK_TOOLS_VERSION" ]; then
+    echo "错误: 无法从 APKINDEX 获取 apk-tools-static 版本"
+    exit 1
 fi
 
-tar -xzf /tmp/apk-tools-static.apk -C /tmp
-APK_STATIC="/tmp/sbin/apk.static"
+APK_TOOLS_FILE="apk-tools-static-${APK_TOOLS_VERSION}.apk"
+echo "找到版本: $APK_TOOLS_FILE"
+
+# 下载 apk-tools-static
+rm -f /tmp/apk-tools-static.apk
+wget -O /tmp/apk-tools-static.apk \
+    "$ALPINE_MIRROR/$ALPINE_VERSION/main/$ALPINE_ARCH/$APK_TOOLS_FILE"
+
+# 解压（清理后再解压避免冲突）
+rm -rf /tmp/apk-static-extract
+mkdir -p /tmp/apk-static-extract
+tar -xzf /tmp/apk-tools-static.apk -C /tmp/apk-static-extract
+APK_STATIC="/tmp/apk-static-extract/sbin/apk.static"
+
+if [ ! -x "$APK_STATIC" ]; then
+    echo "错误: apk.static 未找到或不可执行"
+    ls -la /tmp/apk-static-extract/sbin/ 2>&1 || true
+    exit 1
+fi
 
 # 初始化 apk 数据库
 $APK_STATIC --arch $ALPINE_ARCH --root "$MOUNT_POINT" \
