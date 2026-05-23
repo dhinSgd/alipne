@@ -184,9 +184,9 @@ rm -rf /usr/share/info/*
 rm -rf /usr/share/i18n/locales/*
 rm -rf /usr/share/locale/*
 rm -rf /var/cache/apk/*
-```text
+```
 
-并删除非虚拟化所需的内核模块（保留 virtio 全套）。
+**注意**：保持官方完整内核，不精简内核模块。
 
 ## 6. 关键配置文件
 
@@ -220,19 +220,17 @@ AllowAgentForwarding no
 UseDNS no
 ```
 
-### 6.3 DNS 配置
+### 6.3 DNS 配置（智能回退）
 
 `/etc/resolv.conf`：
 
 ```text
-nameserver 1.1.1.1
-nameserver 8.8.8.8
-nameserver 1.0.0.1
-nameserver 8.8.4.4
-options edns0 single-request-reopen
+# DNS 配置 - 由 DHCP 自动获取
+# 如果 DHCP 未提供 DNS，将自动回退到 Cloudflare + Google DNS
+# 此文件由 udhcpc 管理
 ```
 
-`/etc/network/interfaces`（防止 DHCP 覆盖）：
+`/etc/network/interfaces`：
 
 ```text
 auto lo
@@ -240,23 +238,31 @@ iface lo inet loopback
 
 auto eth0
 iface eth0 inet dhcp
-    dns-nameservers 1.1.1.1 8.8.8.8 1.0.0.1 8.8.4.4
-```text
-
-cloud-init 备份配置 `/etc/cloud/cloud.cfg.d/99-dns.cfg`：
-
-```yaml
-manage_resolv_conf: true
-resolv_conf:
-  nameservers:
-    - 1.1.1.1
-    - 8.8.8.8
-    - 1.0.0.1
-    - 8.8.4.4
-  options:
-    edns0: true
-    single-request-reopen: true
 ```
+
+`/etc/udhcpc/post-bound/dns-fallback`（智能回退脚本）：
+
+```bash
+#!/bin/sh
+# DNS 回退脚本：如果 DHCP 未提供 DNS，使用 Cloudflare + Google
+
+RESOLV_CONF="/etc/resolv.conf"
+FALLBACK_DNS="1.1.1.1 8.8.8.8 1.0.0.1 8.8.4.4"
+
+# 检查 resolv.conf 是否有有效的 nameserver
+if ! grep -q "^nameserver" "$RESOLV_CONF" 2>/dev/null; then
+    echo "# DHCP 未提供 DNS，使用回退 DNS 服务器" > "$RESOLV_CONF"
+    for dns in $FALLBACK_DNS; do
+        echo "nameserver $dns" >> "$RESOLV_CONF"
+    done
+    echo "options edns0 single-request-reopen" >> "$RESOLV_CONF"
+    logger -t udhcpc "DHCP 未提供 DNS，已配置回退 DNS: $FALLBACK_DNS"
+fi
+```
+
+**工作原理**：
+- DHCP 成功提供 DNS → 使用 DHCP 的 DNS
+- DHCP 未提供 DNS → 自动回退到 Cloudflare + Google DNS
 
 ### 6.4 cloud-init 最小配置
 
@@ -316,8 +322,7 @@ qemu-guest-agent, cloud-init
 ├── Makefile                     # 简化常用命令
 ├── config/
 │   ├── packages.list            # 要安装的包列表
-│   ├── world                    # alpine world 文件
-│   └── kernel-modules.list      # 保留的内核模块白名单
+│   └── world                    # alpine world 文件
 ├── overlay/                     # 覆盖到根文件系统的文件
 │   ├── etc/
 │   │   ├── fstab
@@ -326,7 +331,8 @@ qemu-guest-agent, cloud-init
 │   │   ├── sysctl.d/99-zram.conf
 │   │   ├── resolv.conf
 │   │   ├── network/interfaces
-│   │   └── cloud/cloud.cfg.d/99-dns.cfg
+│   │   ├── udhcpc/post-bound/dns-fallback
+│   │   └── cloud/cloud.cfg
 │   └── etc/local.d/
 │       └── post-install.start
 ├── scripts/
@@ -374,7 +380,7 @@ qemu-guest-agent, cloud-init
 
 6. 清理精简
    删除文档、locale、apk 缓存
-   删除非虚拟化内核模块
+   保持官方完整内核（不精简内核模块）
    btrfs filesystem defragment（重新压缩）
 
 7. 卸载并转换格式
@@ -446,7 +452,7 @@ qemu-system-x86_64 \
 
 □ 网络验证
   □ ping 1.1.1.1 通
-  □ DNS 为 Cloudflare + Google
+  □ DNS 智能回退工作正常（DHCP 或 Cloudflare + Google）
 
 □ 重启验证
   □ 能正常重启
@@ -505,7 +511,7 @@ passwd
 - ✓ 硬盘配置：EFI 100MB + btrfs 900MB = 1G（符合）
 - ✓ 压缩配置：btrfs zstd:9 + zram zstd（一致）
 - ✓ SSH 配置：允许 root 密码登录（符合用户要求）
-- ✓ DNS 配置：Cloudflare + Google（符合用户要求）
+- ✓ DNS 配置：DHCP 优先，回退到 Cloudflare + Google（符合用户要求）
 - ✓ 不使用硬盘 swap：仅 zram（符合）
 - ✓ 启动方式：UEFI/GPT（符合）
 - ✓ 镜像格式：QCOW2（符合）
@@ -519,7 +525,7 @@ passwd
 | zram-init 不启动 | swap 不可用 | 启动后检查 `swapon`；提供回退脚本 |
 | 1G 硬盘溢出 | 写入失败 | 构建后实测占用 < 100MB；监控脚本预警 |
 | cloud-init 在阿里云不识别 | 无法注入 SSH key | 默认设置 root 密码；datasource_list 包含 AliYun |
-| 内核模块不全 | 设备识别失败 | 保留 virtio 全套（virtio-pci, virtio-net, virtio-blk 等） |
+| 内核模块不全 | 设备识别失败 | 保持官方完整内核（不精简模块） |
 
 ## 13. 预估指标
 
