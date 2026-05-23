@@ -54,7 +54,7 @@ echo ""
 echo "==> 基础系统"
 check "操作系统" "grep -q Alpine /etc/os-release"
 check "内核版本" "uname -r | grep -q virt"
-check "主机名" "hostname | grep -q alipne"
+check "主机名" "hostname | grep -q SlimAlpine"
 check "时区" "[ -L /etc/localtime ]"
 
 echo ""
