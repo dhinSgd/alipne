@@ -71,7 +71,7 @@ echo ""
 echo "==> 内存管理"
 check "zram 设备" "[ -b /dev/zram0 ]"
 check "zram swap" "swapon -s | grep -q zram0"
-check_output "swappiness" "cat /proc/sys/vm/swappiness" "100"
+check_output "swappiness" "cat /proc/sys/vm/swappiness" "80"
 check "zstd 压缩" "zramctl | grep -q zstd"
 
 echo ""

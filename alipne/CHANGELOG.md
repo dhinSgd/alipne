@@ -29,7 +29,7 @@
 ### 配置
 - SSH 允许 root 密码登录（默认密码: SlimAlpine123）
 - DNS: DHCP 优先，回退到 Cloudflare + Google
-- swappiness=100（优先使用 zram）
+- swappiness=80（适度使用 zram）
 - noatime 挂载选项（减少写入）
 
 ## [0.1.0] - 2026-05-24

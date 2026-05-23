@@ -95,7 +95,7 @@
 - **压缩算法**：zstd（与 btrfs 一致）
 - **预估压缩比**：~2.5x
 - **最坏情况物理 RAM 占用**：~200MB
-- **swappiness**：100（优先使用 zram，比硬盘 swap 快 100 倍）
+- **swappiness：80（适度使用 zram，比硬盘 swap 快 100 倍）
 
 ### `/etc/conf.d/zram-init`
 
@@ -119,7 +119,7 @@ opte0=""
 ### `/etc/sysctl.d/99-zram.conf`
 
 ```bash
-vm.swappiness=100
+vm.swappiness=80
 vm.vfs_cache_pressure=50
 vm.dirty_background_ratio=1
 vm.dirty_ratio=5
@@ -448,7 +448,7 @@ qemu-system-x86_64 \
 
 □ zram 验证
   □ swapon 显示 /dev/zram0 (384MB, zstd)
-  □ swappiness = 100
+  □ swappiness = 80
 
 □ btrfs 验证
   □ mount 显示 compress=zstd:3, noatime
