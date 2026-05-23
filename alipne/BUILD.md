@@ -109,7 +109,7 @@ cat /proc/sys/vm/swappiness
 ### btrfs 验证
 ```bash
 mount | grep btrfs
-# 应显示 compress=zstd:9, noatime
+# 应显示 compress=zstd:3, noatime
 
 btrfs subvolume list /
 # 应显示 @, @home, @var_log 子卷

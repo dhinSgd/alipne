@@ -21,7 +21,7 @@ if [ ! -e "${LOOP_DEV}p1" ]; then
 fi
 
 mkdir -p "$MOUNT_POINT"
-mount -o subvol=@,compress=zstd:9,noatime "${LOOP_DEV}p2" "$MOUNT_POINT"
+mount -o subvol=@,compress=zstd:3,noatime "${LOOP_DEV}p2" "$MOUNT_POINT"
 mount "${LOOP_DEV}p1" "$MOUNT_POINT/boot/efi"
 
 # 挂载虚拟文件系统

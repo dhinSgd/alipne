@@ -20,7 +20,7 @@
 
 1. 极小化系统占用，留出尽可能多的空间给应用
 2. 使用 zram 以 CPU 换取更多可用内存（目标总可用内存 ~1 GB）
-3. 使用 btrfs zstd 压缩硬盘（zstd:9，约 2.2-2.5x 压缩比）
+3. 使用 btrfs zstd 压缩硬盘（zstd:3，约 2.2-2.5x 压缩比）
 4. 用途：轻量级服务器（SSH 为主，未来可能加反向代理）
 5. 启动方式：UEFI/GPT
 6. 在当前 Ubuntu 系统中构建、测试、打包
@@ -43,7 +43,7 @@
 │  存储层：                                        │
 │    /dev/vda (1G, GPT)                            │
 │    ├ vda1: 100MB FAT32 (EFI)                    │
-│    └ vda2: ~900MB btrfs (zstd:9, noatime)       │
+│    └ vda2: ~900MB btrfs (zstd:3, noatime)       │
 │                                                  │
 │  服务层：                                        │
 │    sshd, chronyd, cloud-init, qemu-guest-agent  │
@@ -66,7 +66,7 @@
           文件系统: btrfs
           挂载: /
           挂载选项:
-            - compress=zstd:9
+            - compress=zstd:3
             - noatime
             - ssd
             - space_cache=v2
@@ -204,9 +204,9 @@ rm -rf /var/cache/apk/*
 ### 6.1 `/etc/fstab`
 
 ```text
-UUID=<root-uuid>  /          btrfs  subvol=@,compress=zstd:9,noatime,ssd,space_cache=v2,discard=async  0  0
-UUID=<root-uuid>  /home      btrfs  subvol=@home,compress=zstd:9,noatime,ssd,space_cache=v2            0  0
-UUID=<root-uuid>  /var/log   btrfs  subvol=@var_log,compress=zstd:9,noatime,ssd,space_cache=v2         0  0
+UUID=<root-uuid>  /          btrfs  subvol=@,compress=zstd:3,noatime,ssd,space_cache=v2,discard=async  0  0
+UUID=<root-uuid>  /home      btrfs  subvol=@home,compress=zstd:3,noatime,ssd,space_cache=v2            0  0
+UUID=<root-uuid>  /var/log   btrfs  subvol=@var_log,compress=zstd:3,noatime,ssd,space_cache=v2         0  0
 UUID=<efi-uuid>   /boot/efi  vfat   defaults,noatime                                                    0  2
 
 tmpfs             /tmp       tmpfs  defaults,size=128M,mode=1777                                        0  0
@@ -378,7 +378,7 @@ qemu-guest-agent, cloud-init
 3. 挂载并安装 Alpine
    mkfs.fat -F32 /dev/loop0p1
    mkfs.btrfs /dev/loop0p2
-   mount -o compress=zstd:9,noatime ...
+   mount -o compress=zstd:3,noatime ...
    创建 btrfs 子卷 (@, @home, @var_log)
    apk --root /mnt --initdb add ...packages...
 
@@ -451,7 +451,7 @@ qemu-system-x86_64 \
   □ swappiness = 100
 
 □ btrfs 验证
-  □ mount 显示 compress=zstd:9, noatime
+  □ mount 显示 compress=zstd:3, noatime
   □ 子卷 @, @home, @var_log 存在
 
 □ 系统占用验证
@@ -521,7 +521,7 @@ passwd
 
 - ✓ 内存配置：zram 500MB + 物理 0.5G = ~1G 总可用（符合需求）
 - ✓ 硬盘配置：EFI 100MB + btrfs 900MB = 1G（符合）
-- ✓ 压缩配置：btrfs zstd:9 + zram zstd（一致）
+- ✓ 压缩配置：btrfs zstd:3 + zram zstd（一致）
 - ✓ SSH 配置：允许 root 密码登录（符合用户要求）
 - ✓ DNS 配置：DHCP 优先，回退到 Cloudflare + Google（符合用户要求）
 - ✓ 不使用硬盘 swap：仅 zram（符合）
@@ -533,7 +533,7 @@ passwd
 | 风险 | 影响 | 缓解措施 |
 |------|------|---------|
 | UEFI 启动失败 | 系统无法启动 | 用 OVMF 在 QEMU 中预先验证；保留 grub 命令行救援 |
-| btrfs 压缩异常 | 文件读取失败 | 选择稳定级别 zstd:9；测试阶段强制 `btrfs scrub` 验证 |
+| btrfs 压缩异常 | 文件读取失败 | 选择稳定级别 zstd:3；测试阶段强制 `btrfs scrub` 验证 |
 | zram-init 不启动 | swap 不可用 | 启动后检查 `swapon`；提供回退脚本 |
 | 1G 硬盘溢出 | 写入失败 | 构建后实测占用 < 100MB；监控脚本预警 |
 | cloud-init 在阿里云不识别 | 无法注入 SSH key | 默认设置 root 密码；datasource_list 包含 AliYun |
