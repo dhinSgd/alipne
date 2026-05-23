@@ -1,6 +1,6 @@
 # alipne - 极简 Alpine Linux 系统镜像
 
-[![Build Status](https://github.com/YOUR_USERNAME/alipne/workflows/Build%20Alpine%20Linux%20Image/badge.svg)](https://github.com/YOUR_USERNAME/alipne/actions)
+[![Build Status](https://github.com/dhinSgd/alipne/workflows/Build%20Alpine%20Linux%20Image/badge.svg)](https://github.com/dhinSgd/alipne/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Alpine Linux](https://img.shields.io/badge/Alpine%20Linux-v3.20-0D597F?logo=alpine-linux)](https://alpinelinux.org/)
 
@@ -134,5 +134,5 @@ passwd
 ## 联系方式
 
 - 作者: sunxizhen
-- GitHub: [YOUR_USERNAME/alipne](https://github.com/YOUR_USERNAME/alipne)
-- Issues: [提交问题](https://github.com/YOUR_USERNAME/alipne/issues)
+- GitHub: [dhinSgd/alipne](https://github.com/dhinSgd/alipne)
+- Issues: [提交问题](https://github.com/dhinSgd/alipne/issues)

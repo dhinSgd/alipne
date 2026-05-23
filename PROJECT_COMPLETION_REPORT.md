@@ -118,7 +118,7 @@ LICENSE                     - MIT 许可证
 
 ### GitHub（待创建）
 - ⏳ 待推送
-- 地址: `https://github.com/YOUR_USERNAME/alipne`
+- 地址: `https://github.com/dhinSgd/alipne`
 - 可见性: Public
 
 ## GitHub Actions CI/CD
@@ -242,8 +242,8 @@ MIT License
 
 ## 联系方式
 
-- GitHub: https://github.com/YOUR_USERNAME/alipne
-- Issues: https://github.com/YOUR_USERNAME/alipne/issues
+- GitHub: https://github.com/dhinSgd/alipne
+- Issues: https://github.com/dhinSgd/alipne/issues
 
 ---
 

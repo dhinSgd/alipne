@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: 📖 文档
-    url: https://github.com/YOUR_USERNAME/alipne/blob/main/README.md
+    url: https://github.com/dhinSgd/alipne/blob/main/README.md
     about: 查看项目文档
   - name: 💬 讨论
-    url: https://github.com/YOUR_USERNAME/alipne/discussions
+    url: https://github.com/dhinSgd/alipne/discussions
     about: 提问和讨论

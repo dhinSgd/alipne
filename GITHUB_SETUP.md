@@ -20,10 +20,10 @@
 cd /workspace/alipne
 
 # 添加 GitHub 远程仓库
-git remote add github https://github.com/YOUR_USERNAME/alipne.git
+git remote add github https://github.com/dhinSgd/alipne.git
 
 # 或使用 SSH（推荐）
-git remote add github git@github.com:YOUR_USERNAME/alipne.git
+git remote add github git@github.com:dhinSgd/alipne.git
 
 # 推送代码
 git push github main
@@ -95,10 +95,10 @@ git push github main
 
 ## 步骤 7: 更新 README 中的链接
 
-编辑 `README.md`，将 `YOUR_USERNAME` 替换为你的 GitHub 用户名：
+编辑 `README.md`，将 `dhinSgd` 替换为你的 GitHub 用户名：
 
 ```bash
-sed -i 's/YOUR_USERNAME/你的用户名/g' README.md
+sed -i 's/dhinSgd/你的用户名/g' README.md
 git add README.md
 git commit -m "docs: 更新 GitHub 用户名"
 git push github main
@@ -133,11 +133,11 @@ git push github main
 
 在 README.md 中已添加以下徽章：
 
-- [![Build Status](https://github.com/YOUR_USERNAME/alipne/workflows/Build%20Alpine%20Linux%20Image/badge.svg)](https://github.com/YOUR_USERNAME/alipne/actions)
+- [![Build Status](https://github.com/dhinSgd/alipne/workflows/Build%20Alpine%20Linux%20Image/badge.svg)](https://github.com/dhinSgd/alipne/actions)
 - [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 - [![Alpine Linux](https://img.shields.io/badge/Alpine%20Linux-v3.20-0D597F?logo=alpine-linux)](https://alpinelinux.org/)
 
-记得替换 `YOUR_USERNAME`！
+记得替换 `dhinSgd`！
 
 ## 故障排除
 
@@ -154,7 +154,7 @@ git push github main
 git remote -v
 
 # 如果需要，更新远程 URL
-git remote set-url github git@github.com:YOUR_USERNAME/alipne.git
+git remote set-url github git@github.com:dhinSgd/alipne.git
 ```
 
 ### Release 未创建
@@ -173,4 +173,4 @@ git remote set-url github git@github.com:YOUR_USERNAME/alipne.git
 
 ---
 
-**注意**: 记得在所有文档中将 `YOUR_USERNAME` 替换为你的实际 GitHub 用户名！
+**注意**: 记得在所有文档中将 `dhinSgd` 替换为你的实际 GitHub 用户名！
