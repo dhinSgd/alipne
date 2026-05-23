@@ -52,3 +52,6 @@ drivers/watchdog/
 
 # 热插拔（PCI hotplug 等，云环境不需要）
 drivers/pci/hotplug/
+
+# 内存气球（固定内存 ECS 不需要动态内存管理）
+drivers/virtio/virtio_balloon.ko
