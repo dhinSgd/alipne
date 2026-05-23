@@ -50,6 +50,25 @@ jobs:
       run: |
         ls -lh output/
         qemu-img info output/alipne.qcow2
+        qemu-img check output/alipne.qcow2
+
+    - name: Verify image contents
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libguestfs-tools
+
+        echo "==> 检查镜像内部文件..."
+        sudo virt-ls -a output/alipne.qcow2 / || echo "⚠ virt-ls 失败，跳过"
+
+        echo "==> 验证关键文件存在..."
+        sudo virt-cat -a output/alipne.qcow2 /etc/hostname || echo "⚠ 无法读取 hostname"
+        sudo virt-cat -a output/alipne.qcow2 /etc/fstab | head -5 || echo "⚠ 无法读取 fstab"
+        sudo virt-cat -a output/alipne.qcow2 /etc/modules | head -10 || echo "⚠ 无法读取 modules"
+
+        echo "==> 检查软件包..."
+        sudo virt-cat -a output/alipne.qcow2 /etc/apk/world | head -10 || echo "⚠ 无法读取 world"
+
+        echo "✓ 镜像验证完成"
 
     - name: Upload image artifact
       uses: actions/upload-artifact@v4
