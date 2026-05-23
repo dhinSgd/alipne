@@ -1,5 +1,9 @@
 # alipne - 极简 Alpine Linux 系统镜像
 
+[![Build Status](https://github.com/YOUR_USERNAME/alipne/workflows/Build%20Alpine%20Linux%20Image/badge.svg)](https://github.com/YOUR_USERNAME/alipne/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Alpine Linux](https://img.shields.io/badge/Alpine%20Linux-v3.20-0D597F?logo=alpine-linux)](https://alpinelinux.org/)
+
 基于 Alpine Linux 的极小化系统镜像，专为阿里云低配置 ECS 实例设计。
 
 ## 目标平台
@@ -113,6 +117,22 @@ passwd
 
 详见 [设计文档](brainstorm/specs/2026-05-24-alipne-minimal-system-design.md)
 
+## 贡献
+
+欢迎贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何参与项目。
+
 ## 许可证
 
-MIT
+[MIT License](LICENSE) - 详见 LICENSE 文件
+
+## 致谢
+
+- [Alpine Linux](https://alpinelinux.org/) - 优秀的轻量级 Linux 发行版
+- [btrfs](https://btrfs.wiki.kernel.org/) - 现代文件系统
+- [zstd](https://github.com/facebook/zstd) - 高效压缩算法
+
+## 联系方式
+
+- 作者: sunxizhen
+- GitHub: [YOUR_USERNAME/alipne](https://github.com/YOUR_USERNAME/alipne)
+- Issues: [提交问题](https://github.com/YOUR_USERNAME/alipne/issues)

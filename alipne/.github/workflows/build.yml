@@ -1,0 +1,95 @@
+name: Build Alpine Linux Image
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Free disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo apt-get clean
+        df -h
+
+    - name: Prepare build environment
+      run: |
+        sudo bash scripts/01-prepare-host.sh
+
+    - name: Build root filesystem
+      run: |
+        sudo bash scripts/02-build-rootfs.sh
+
+    - name: Setup bootloader
+      run: |
+        sudo bash scripts/03-setup-bootloader.sh
+
+    - name: Cleanup and optimize
+      run: |
+        sudo bash scripts/04-cleanup.sh
+
+    - name: Pack image
+      run: |
+        sudo bash scripts/05-pack-image.sh
+
+    - name: Check image info
+      run: |
+        ls -lh output/
+        qemu-img info output/alipne.qcow2
+
+    - name: Upload image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: alipne-image
+        path: output/alipne.qcow2
+        retention-days: 30
+
+    - name: Create Release
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v0.1.0-${{ github.run_number }}
+        name: Alpine Linux Minimal Image v0.1.0-${{ github.run_number }}
+        body: |
+          ## alipne - 极简 Alpine Linux 系统镜像
+
+          **构建日期**: ${{ github.event.head_commit.timestamp }}
+          **提交**: ${{ github.sha }}
+
+          ### 系统特性
+          - Alpine Linux v3.20
+          - UEFI/GPT 启动
+          - btrfs + zstd:9 压缩
+          - zram 内存压缩 500MB
+          - 系统占用 ~80-100 MB
+          - 总可用内存 ~1 GB
+
+          ### 使用方法
+          1. 下载 `alipne.qcow2`
+          2. 上传到阿里云 OSS
+          3. 导入自定义镜像（UEFI 模式）
+          4. 创建 ECS 实例
+
+          ### 默认登录
+          - 用户名: root
+          - 密码: alipne123
+          - **首次登录后请立即修改密码！**
+
+          详细文档请查看仓库 README.md
+        files: |
+          output/alipne.qcow2
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
