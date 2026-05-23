@@ -56,17 +56,18 @@ if [ -d "$MODULES_DIR" ]; then
             [[ "$pattern" =~ ^#.*$ ]] && continue
             [[ -z "$pattern" ]] && continue
 
-            # 删除匹配的模块目录
-            if [ -d "$MODULES_DIR/kernel/$pattern" ]; then
+            # 删除匹配的模块（目录或文件）
+            TARGET="$MODULES_DIR/kernel/$pattern"
+            if [ -e "$TARGET" ]; then
                 echo "  删除: $pattern"
-                rm -rf "$MODULES_DIR/kernel/$pattern"
+                rm -rf "$TARGET"
                 DELETED_COUNT=$((DELETED_COUNT + 1))
             fi
         done < "$BLACKLIST_FILE"
 
         # 重新生成模块依赖
         if [ $DELETED_COUNT -gt 0 ]; then
-            echo "  已删除 $DELETED_COUNT 类模块，重新生成依赖..."
+            echo "  已删除 $DELETED_COUNT 项，重新生成依赖..."
             depmod -b "$MOUNT_POINT" "$KERNEL_VERSION"
             echo "✓ 内核模块清理完成"
         else
