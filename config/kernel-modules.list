@@ -1,0 +1,12 @@
+# 保留的内核模块白名单（virtio 全套）
+kernel/drivers/virtio/
+kernel/drivers/block/virtio_blk.ko
+kernel/drivers/net/virtio_net.ko
+kernel/drivers/char/hw_random/virtio-rng.ko
+kernel/drivers/scsi/virtio_scsi.ko
+kernel/net/
+kernel/fs/btrfs/
+kernel/fs/fat/
+kernel/fs/vfat/
+kernel/fs/nls/
+kernel/crypto/

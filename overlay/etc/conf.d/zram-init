@@ -1,0 +1,18 @@
+# zram-init 配置
+# 创建 500MB zram swap 设备
+
+num_devices=1
+
+# 设备 0: swap
+load0="swap"
+type0="swap"
+flag0="zram"
+size0=500
+maxs0=2
+algo0="zstd"
+labl0="zram-swap"
+uuid0=""
+notr0=""
+mntp0=""
+opts0=""
+opte0=""
