@@ -117,15 +117,17 @@ fi
 
 # 初始化 apk 数据库
 $APK_STATIC --arch $ALPINE_ARCH --root "$MOUNT_POINT" \
-    --initdb --repository "$ALPINE_MIRROR/$ALPINE_VERSION/main" \
+    --initdb --allow-untrusted \
+    --repository "$ALPINE_MIRROR/$ALPINE_VERSION/main" \
     --repository "$ALPINE_MIRROR/$ALPINE_VERSION/community" \
-    add alpine-base
+    add alpine-base alpine-keys
 
 echo "==> 安装软件包..."
 # 读取包列表并安装
 PACKAGES=$(cat "$CONFIG_DIR/packages.list" | grep -v '^#' | grep -v '^$' | tr '\n' ' ')
 
 $APK_STATIC --arch $ALPINE_ARCH --root "$MOUNT_POINT" \
+    --allow-untrusted \
     --repository "$ALPINE_MIRROR/$ALPINE_VERSION/main" \
     --repository "$ALPINE_MIRROR/$ALPINE_VERSION/community" \
     add $PACKAGES
