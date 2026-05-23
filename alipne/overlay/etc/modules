@@ -1,0 +1,24 @@
+# 开机自动加载的内核模块
+# 由 OpenRC modules 服务在 boot runlevel 加载
+
+# Virtio 虚拟化驱动（核心）
+virtio
+virtio_pci
+virtio_ring
+virtio_blk
+virtio_net
+virtio_scsi
+virtio_balloon
+virtio_rng
+
+# 网络相关
+tun
+
+# Btrfs 文件系统
+btrfs
+
+# Zram（由 zram-init 服务管理，但提前加载模块）
+zram
+
+# 加密支持
+zstd_compress
