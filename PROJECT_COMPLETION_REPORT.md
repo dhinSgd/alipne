@@ -84,7 +84,7 @@ LICENSE                     - MIT 许可证
 ### 核心特性
 - ✅ Alpine Linux v3.20 基础系统
 - ✅ UEFI/GPT 启动支持
-- ✅ btrfs 文件系统 + zstd:9 压缩（2.2-2.5x）
+- ✅ btrfs 文件系统 + zstd:3 压缩（2.2-2.5x）
 - ✅ zram 内存压缩 500MB（2.5x 压缩比）
 - ✅ 子卷布局（@, @home, @var_log, @snapshots）
 - ✅ cloud-init 阿里云支持
@@ -104,7 +104,7 @@ LICENSE                     - MIT 许可证
 | 内核 | linux-virt | 虚拟化优化、体积小 |
 | Init | OpenRC | 轻量、快速 |
 | 文件系统 | btrfs | 透明压缩、子卷、快照 |
-| 压缩算法 | zstd:9 | 高压缩比、快速解压 |
+| 压缩算法 | zstd:3 | 高压缩比、快速解压 |
 | 内存管理 | zram | CPU 换内存、2.5x 压缩 |
 | 启动方式 | UEFI/GPT | 现代标准 |
 | 镜像格式 | QCOW2 | 云平台标准、支持压缩 |

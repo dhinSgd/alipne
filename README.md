@@ -17,7 +17,7 @@
 
 - ✓ 极小化系统占用（~80-100 MB）
 - ✓ zram 压缩内存（总可用 ~1 GB）
-- ✓ btrfs zstd:9 压缩硬盘（2.2-2.5x 压缩比）
+- ✓ btrfs zstd:3 压缩硬盘（2.2-2.5x 压缩比）
 - ✓ UEFI/GPT 启动
 - ✓ 支持阿里云 cloud-init
 
@@ -74,7 +74,7 @@ passwd
 物理 RAM 0.5G + zram swap 500MB = 总可用 ~1GB
 /dev/vda (1G, GPT)
 ├── vda1: 100MB FAT32 (EFI)
-└── vda2: 900MB btrfs (zstd:9, noatime)
+└── vda2: 900MB btrfs (zstd:3, noatime)
     ├── @ → /
     ├── @home → /home
     ├── @var_log → /var/log

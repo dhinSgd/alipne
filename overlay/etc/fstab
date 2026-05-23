@@ -2,9 +2,9 @@
 # <file system>  <mount point>  <type>  <options>  <dump>  <pass>
 
 # btrfs 根文件系统（使用 UUID，构建时替换）
-UUID=ROOT_UUID  /          btrfs  subvol=@,compress=zstd:9,noatime,ssd,space_cache=v2,discard=async  0  0
-UUID=ROOT_UUID  /home      btrfs  subvol=@home,compress=zstd:9,noatime,ssd,space_cache=v2            0  0
-UUID=ROOT_UUID  /var/log   btrfs  subvol=@var_log,compress=zstd:9,noatime,ssd,space_cache=v2         0  0
+UUID=ROOT_UUID  /          btrfs  subvol=@,compress=zstd:3,noatime,ssd,space_cache=v2,discard=async  0  0
+UUID=ROOT_UUID  /home      btrfs  subvol=@home,compress=zstd:3,noatime,ssd,space_cache=v2            0  0
+UUID=ROOT_UUID  /var/log   btrfs  subvol=@var_log,compress=zstd:3,noatime,ssd,space_cache=v2         0  0
 
 # EFI 分区（使用 UUID，构建时替换）
 UUID=EFI_UUID   /boot/efi  vfat   defaults,noatime  0  2

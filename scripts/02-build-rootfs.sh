@@ -44,7 +44,7 @@ mkfs.btrfs -f -L alipne "${LOOP_DEV}p2"
 
 echo "==> 挂载并创建 btrfs 子卷..."
 mkdir -p "$MOUNT_POINT"
-mount -o compress=zstd:9,noatime "${LOOP_DEV}p2" "$MOUNT_POINT"
+mount -o compress=zstd:3,noatime "${LOOP_DEV}p2" "$MOUNT_POINT"
 
 # 创建子卷
 btrfs subvolume create "$MOUNT_POINT/@"
@@ -54,16 +54,16 @@ btrfs subvolume create "$MOUNT_POINT/@snapshots"
 
 # 卸载并重新挂载根子卷
 umount "$MOUNT_POINT"
-mount -o subvol=@,compress=zstd:9,noatime,ssd,space_cache=v2,discard=async \
+mount -o subvol=@,compress=zstd:3,noatime,ssd,space_cache=v2,discard=async \
     "${LOOP_DEV}p2" "$MOUNT_POINT"
 
 # 创建挂载点
 mkdir -p "$MOUNT_POINT"/{home,var/log,.snapshots,boot/efi,dev,proc,sys,run,tmp}
 
 # 挂载其他子卷
-mount -o subvol=@home,compress=zstd:9,noatime,ssd,space_cache=v2 \
+mount -o subvol=@home,compress=zstd:3,noatime,ssd,space_cache=v2 \
     "${LOOP_DEV}p2" "$MOUNT_POINT/home"
-mount -o subvol=@var_log,compress=zstd:9,noatime,ssd,space_cache=v2 \
+mount -o subvol=@var_log,compress=zstd:3,noatime,ssd,space_cache=v2 \
     "${LOOP_DEV}p2" "$MOUNT_POINT/var/log"
 
 # 挂载 EFI 分区
