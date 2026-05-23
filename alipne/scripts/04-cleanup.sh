@@ -40,6 +40,43 @@ rm -rf "$MOUNT_POINT/tmp"/*
 rm -rf "$MOUNT_POINT/var/tmp"/*
 rm -rf "$MOUNT_POINT/var/log"/*
 
+echo "==> 清理内核模块（黑名单模式）..."
+KERNEL_VERSION=$(ls "$MOUNT_POINT/lib/modules/" | head -1)
+MODULES_DIR="$MOUNT_POINT/lib/modules/$KERNEL_VERSION"
+
+if [ -d "$MODULES_DIR" ]; then
+    echo "内核版本: $KERNEL_VERSION"
+
+    # 读取黑名单并删除对应模块
+    BLACKLIST_FILE="$CONFIG_DIR/kernel-modules-blacklist.txt"
+    if [ -f "$BLACKLIST_FILE" ]; then
+        DELETED_COUNT=0
+        while IFS= read -r pattern; do
+            # 跳过注释和空行
+            [[ "$pattern" =~ ^#.*$ ]] && continue
+            [[ -z "$pattern" ]] && continue
+
+            # 删除匹配的模块目录
+            if [ -d "$MODULES_DIR/kernel/$pattern" ]; then
+                echo "  删除: $pattern"
+                rm -rf "$MODULES_DIR/kernel/$pattern"
+                DELETED_COUNT=$((DELETED_COUNT + 1))
+            fi
+        done < "$BLACKLIST_FILE"
+
+        # 重新生成模块依赖
+        if [ $DELETED_COUNT -gt 0 ]; then
+            echo "  已删除 $DELETED_COUNT 类模块，重新生成依赖..."
+            depmod -b "$MOUNT_POINT" "$KERNEL_VERSION"
+            echo "✓ 内核模块清理完成"
+        else
+            echo "✓ 未找到需要删除的模块"
+        fi
+    else
+        echo "⚠ 黑名单文件不存在，跳过内核模块清理"
+    fi
+fi
+
 echo "==> btrfs 碎片整理和重新压缩..."
 btrfs filesystem defragment -r -czstd "$MOUNT_POINT"
 

@@ -1,0 +1,54 @@
+# 内核模块黑名单 - 服务器绝对用不到的模块
+# 采用保守策略，只删除明确不需要的硬件驱动
+
+# 显卡驱动（服务器无显示器）
+drivers/gpu/
+drivers/video/fbdev/
+
+# 声卡驱动（服务器无音频）
+sound/
+
+# 蓝牙（服务器不需要）
+drivers/bluetooth/
+net/bluetooth/
+
+# 无线网卡（服务器用有线）
+drivers/net/wireless/
+
+# 物理网卡驱动（虚拟化环境用 virtio-net）
+drivers/net/ethernet/
+
+# 输入设备（键盘/鼠标/触摸板，服务器不需要）
+drivers/input/keyboard/
+drivers/input/mouse/
+drivers/input/touchscreen/
+drivers/hid/
+
+# 多媒体设备（摄像头/电视卡）
+drivers/media/
+
+# USB 外设（保留 USB 存储）
+drivers/usb/serial/
+drivers/usb/misc/
+
+# InfiniBand（高性能计算网络，ECS 不用）
+drivers/infiniband/
+
+# 工业总线（服务器不需要）
+drivers/i2c/
+drivers/spi/
+
+# PCMCIA/CardBus（老式笔记本扩展卡）
+drivers/pcmcia/
+
+# 游戏手柄
+drivers/input/joystick/
+
+# LED 控制
+drivers/leds/
+
+# 看门狗（云环境由 hypervisor 管理）
+drivers/watchdog/
+
+# 热插拔（PCI hotplug 等，云环境不需要）
+drivers/pci/hotplug/
