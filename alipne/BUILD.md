@@ -100,7 +100,7 @@ ssh -p 2222 root@localhost
 ### zram 验证
 ```bash
 swapon -s
-# 应显示 /dev/zram0 (500MB, zstd)
+# 应显示 /dev/zram0 (384MB, zstd)
 
 cat /proc/sys/vm/swappiness
 # 应显示 100

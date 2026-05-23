@@ -151,7 +151,7 @@
 
 ### 2. 内存优化
 - 物理 RAM: 512 MB
-- zram swap: 500 MB (zstd 压缩)
+- zram swap: 384 MB (zstd 压缩)
 - 压缩比: ~2.5x
 - 总可用: ~1 GB
 

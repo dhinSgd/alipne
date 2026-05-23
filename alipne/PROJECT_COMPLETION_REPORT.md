@@ -85,7 +85,7 @@ LICENSE                     - MIT 许可证
 - ✅ Alpine Linux v3.20 基础系统
 - ✅ UEFI/GPT 启动支持
 - ✅ btrfs 文件系统 + zstd:3 压缩（2.2-2.5x）
-- ✅ zram 内存压缩 500MB（2.5x 压缩比）
+- ✅ zram 内存压缩 384MB（2.5x 压缩比）
 - ✅ 子卷布局（@, @home, @var_log, @snapshots）
 - ✅ cloud-init 阿里云支持
 - ✅ 极小化占用（~80-100 MB）

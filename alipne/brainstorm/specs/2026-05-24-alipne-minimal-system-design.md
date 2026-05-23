@@ -37,7 +37,7 @@
 │  - libc: musl                                    │
 │                                                  │
 │  内存层：                                        │
-│    物理 RAM 0.5G + zram swap 500MB              │
+│    物理 RAM 0.5G + zram swap 384MB              │
 │    总可用 ≈ 0.5G + 0.5G - 0.2G = ~0.8-1G        │
 │                                                  │
 │  存储层：                                        │
@@ -447,7 +447,7 @@ qemu-system-x86_64 \
   □ key 登录可用
 
 □ zram 验证
-  □ swapon 显示 /dev/zram0 (500MB, zstd)
+  □ swapon 显示 /dev/zram0 (384MB, zstd)
   □ swappiness = 100
 
 □ btrfs 验证
@@ -519,7 +519,7 @@ passwd
 
 ## 11. 内部一致性检查
 
-- ✓ 内存配置：zram 500MB + 物理 0.5G = ~1G 总可用（符合需求）
+- ✓ 内存配置：zram 384MB + 物理 0.5G = ~1G 总可用（符合需求）
 - ✓ 硬盘配置：EFI 100MB + btrfs 900MB = 1G（符合）
 - ✓ 压缩配置：btrfs zstd:3 + zram zstd（一致）
 - ✓ SSH 配置：允许 root 密码登录（符合用户要求）

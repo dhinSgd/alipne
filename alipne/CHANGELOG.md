@@ -20,7 +20,7 @@
 - Alpine Linux v3.20 基础系统
 - UEFI/GPT 启动支持
 - btrfs 文件系统 + zstd:3 压缩
-- zram 内存压缩（500MB）
+- zram 内存压缩（384MB）
 - 子卷布局（@, @home, @var_log, @snapshots）
 - cloud-init 阿里云支持
 - 预配置服务（sshd, chronyd, crond, qemu-guest-agent）
