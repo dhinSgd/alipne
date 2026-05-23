@@ -1,0 +1,22 @@
+# alipne 项目 gitignore
+
+# 构建产物
+output/*.raw
+output/*.qcow2
+output/*.img
+
+# 临时文件
+*.tmp
+*.log
+/tmp/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db

@@ -1,0 +1,32 @@
+# 基础系统
+alpine-base
+alpine-conf
+linux-virt
+linux-firmware-none
+
+# 启动相关
+grub
+grub-efi
+efibootmgr
+
+# 文件系统
+btrfs-progs
+e2fsprogs
+dosfstools
+
+# 内存管理
+zram-init
+
+# 网络与服务
+chrony
+openssh-server
+
+# 基础工具
+nano
+curl
+wget
+dcron
+
+# 云平台支持
+cloud-init
+qemu-guest-agent

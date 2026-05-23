@@ -1,0 +1,14 @@
+# SSH 服务器配置
+Port 22
+ListenAddress 0.0.0.0
+
+# 认证
+PermitRootLogin yes
+PubkeyAuthentication yes
+PasswordAuthentication yes
+PermitEmptyPasswords no
+
+# 安全与性能
+X11Forwarding no
+AllowAgentForwarding no
+UseDNS no
