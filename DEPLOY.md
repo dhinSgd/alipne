@@ -87,7 +87,7 @@ aliyun ecs ImportImage \
    - **安全组**: 允许 SSH (22 端口)
 3. 设置登录凭证：
    - **方式 1**: 上传 SSH 密钥（推荐）
-   - **方式 2**: 使用默认密码 `alipne123`（首次登录后立即修改）
+   - **方式 2**: 使用默认密码 `SlimAlpine123`（首次登录后立即修改）
 4. 点击"创建"
 
 ### 4. 首次登录
@@ -102,7 +102,7 @@ ssh root@<ECS公网IP>
 
 ```bash
 ssh root@<ECS公网IP>
-# 密码: alipne123
+# 密码: SlimAlpine123
 
 # 立即修改密码
 passwd

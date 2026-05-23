@@ -158,10 +158,10 @@ chroot "$MOUNT_POINT" /bin/sh <<'CHROOT_EOF'
 set -e
 
 # 设置主机名
-echo "alipne" > /etc/hostname
+echo "SlimAlpine" > /etc/hostname
 
 # 设置 root 密码
-echo "root:alipne123" | chpasswd
+echo "root:SlimAlpine123" | chpasswd
 
 # 配置 OpenRC 服务
 # sysinit

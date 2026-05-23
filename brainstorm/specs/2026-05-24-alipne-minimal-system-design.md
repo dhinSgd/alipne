@@ -465,7 +465,7 @@ qemu-system-x86_64 \
 
 ## 9.1 初始登录方式
 
-构建镜像时设置默认 root 密码（如 `alipne123`），同时 cloud-init 在阿里云首次启动时会注入控制台设置的 SSH key。两种登录方式：
+构建镜像时设置默认 root 密码（如 `SlimAlpine123`），同时 cloud-init 在阿里云首次启动时会注入控制台设置的 SSH key。两种登录方式：
 
 1. **首次启动后通过控制台/VNC 登录**：使用默认 root 密码
 2. **通过 SSH 远程登录**：
@@ -476,8 +476,8 @@ qemu-system-x86_64 \
 
 ```bash
 # 在 chroot 中设置默认 root 密码
-echo "root:alipne123" | chpasswd
-```text
+echo "root:SlimAlpine123" | chpasswd
+```
 
 部署后建议：
 

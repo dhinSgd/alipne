@@ -86,7 +86,7 @@ jobs:
 
           ### 默认登录
           - 用户名: root
-          - 密码: alipne123
+          - 密码: SlimAlpine123
           - **首次登录后请立即修改密码！**
 
           详细文档请查看仓库 README.md

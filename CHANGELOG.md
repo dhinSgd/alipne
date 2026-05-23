@@ -27,8 +27,8 @@
 - 极小化系统占用（~80-100 MB）
 
 ### 配置
-- SSH 允许 root 密码登录（默认密码: alipne123）
-- DNS: Cloudflare (1.1.1.1) + Google (8.8.8.8)
+- SSH 允许 root 密码登录（默认密码: SlimAlpine123）
+- DNS: DHCP 优先，回退到 Cloudflare + Google
 - swappiness=100（优先使用 zram）
 - noatime 挂载选项（减少写入）
 

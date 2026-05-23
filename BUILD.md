@@ -94,7 +94,7 @@ IMAGE_SIZE="1G"  # 总镜像大小
 ```bash
 # 在另一个终端
 ssh -p 2222 root@localhost
-# 密码: alipne123
+# 密码: SlimAlpine123
 ```
 
 ### zram 验证
