@@ -8,7 +8,6 @@ virtio_ring
 virtio_blk
 virtio_net
 virtio_scsi
-virtio_balloon
 virtio_rng
 
 # 网络相关
