@@ -8,7 +8,7 @@
 
 如果你发现了 bug 或有功能建议：
 
-1. 检查 [Issues](https://github.com/YOUR_USERNAME/alipne/issues) 是否已有相关问题
+1. 检查 [Issues](https://github.com/dhinSgd/alipne/issues) 是否已有相关问题
 2. 如果没有，创建新 Issue，包含：
    - 清晰的标题
    - 详细的描述
@@ -26,7 +26,7 @@
 
 2. **克隆你的 Fork**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/alipne.git
+   git clone https://github.com/dhinSgd/alipne.git
    cd alipne
    ```
 
