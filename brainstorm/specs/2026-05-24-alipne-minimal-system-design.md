@@ -57,12 +57,12 @@
 ```text
 /dev/vda (1G, GPT)
 ├── vda1: EFI System Partition
-│         大小: 100MB
+│         大小: 64MB
 │         文件系统: FAT32
 │         挂载: /boot/efi
 │
 └── vda2: Root Partition
-          大小: ~900MB
+          大小: ~936MB
           文件系统: btrfs
           挂载: /
           挂载选项:
@@ -83,7 +83,7 @@
 
 - **不创建 swap 分区**：完全使用 zram swap
 - **不独立 /boot 分区**：内核放在 btrfs 根，省一个分区
-- **EFI 分区 100MB**：留余地给 grub 和备用内核
+- **EFI 分区 64MB**：足够 grub 和内核使用
 - **`noatime`**：避免每次读取都触发写入（小硬盘的大敌）
 - **`discard=async`**：异步 TRIM 通知
 
@@ -186,7 +186,18 @@ rm -rf /usr/share/locale/*
 rm -rf /var/cache/apk/*
 ```
 
-**注意**：保持官方完整内核，不精简内核模块。
+**内核模块清理（黑名单模式）**：
+删除服务器绝对用不到的模块，采用保守策略：
+- 显卡驱动（drivers/gpu/, drivers/video/fbdev/）
+- 声卡驱动（sound/）
+- 蓝牙（drivers/bluetooth/, net/bluetooth/）
+- 无线网卡（drivers/net/wireless/）
+- 物理网卡（drivers/net/ethernet/，虚拟化用 virtio-net）
+- 输入设备（键盘/鼠标/触摸板）
+- 多媒体设备（摄像头/电视卡）
+- 其他：InfiniBand, PCMCIA, 游戏手柄, LED 控制等
+
+预估节省：20-40MB
 
 ## 6. 关键配置文件
 
@@ -322,7 +333,8 @@ qemu-guest-agent, cloud-init
 ├── Makefile                     # 简化常用命令
 ├── config/
 │   ├── packages.list            # 要安装的包列表
-│   └── world                    # alpine world 文件
+│   ├── world                    # alpine world 文件
+│   └── kernel-modules-blacklist.txt  # 内核模块黑名单
 ├── overlay/                     # 覆盖到根文件系统的文件
 │   ├── etc/
 │   │   ├── fstab
@@ -360,8 +372,8 @@ qemu-guest-agent, cloud-init
 2. 创建空白镜像文件 (1GB raw)
    qemu-img create -f raw alipne.raw 1G
    parted: 创建 GPT 分区表
-     vda1: 100MB FAT32 (EFI)
-     vda2: 900MB btrfs
+     vda1: 64MB FAT32 (EFI)
+     vda2: 936MB btrfs
 
 3. 挂载并安装 Alpine
    mkfs.fat -F32 /dev/loop0p1
@@ -380,7 +392,7 @@ qemu-guest-agent, cloud-init
 
 6. 清理精简
    删除文档、locale、apk 缓存
-   保持官方完整内核（不精简内核模块）
+   删除黑名单中的内核模块（显卡/声卡/蓝牙/无线等）
    btrfs filesystem defragment（重新压缩）
 
 7. 卸载并转换格式
@@ -525,16 +537,16 @@ passwd
 | zram-init 不启动 | swap 不可用 | 启动后检查 `swapon`；提供回退脚本 |
 | 1G 硬盘溢出 | 写入失败 | 构建后实测占用 < 100MB；监控脚本预警 |
 | cloud-init 在阿里云不识别 | 无法注入 SSH key | 默认设置 root 密码；datasource_list 包含 AliYun |
-| 内核模块不全 | 设备识别失败 | 保持官方完整内核（不精简模块） |
+| 内核模块不全 | 设备识别失败 | 使用黑名单模式，只删除明确不需要的硬件驱动 |
 
 ## 13. 预估指标
 
 | 指标 | 预估值 |
 |------|--------|
-| 系统占用（虚拟机内 df） | ~80-100 MB |
-| 可用硬盘空间 | ~800 MB |
+| 系统占用（虚拟机内 df） | ~70-90 MB |
+| 可用硬盘空间 | ~840 MB |
 | 虚拟内存总量 | ~1 GB（0.5G RAM + 0.5G zram） |
-| QCOW2 镜像文件大小 | ~120-180 MB |
+| QCOW2 镜像文件大小 | ~100-150 MB |
 | 启动时间 | < 30 秒 |
 | btrfs 压缩比 | ~2.2-2.5x |
 | zram 压缩比 | ~2.5x |

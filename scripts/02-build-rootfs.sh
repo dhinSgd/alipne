@@ -19,9 +19,9 @@ qemu-img create -f raw "$IMAGE_FILE" "$IMAGE_SIZE"
 
 echo "==> 创建 GPT 分区表..."
 parted -s "$IMAGE_FILE" mklabel gpt
-parted -s "$IMAGE_FILE" mkpart primary fat32 1MiB 101MiB
+parted -s "$IMAGE_FILE" mkpart primary fat32 1MiB 65MiB
 parted -s "$IMAGE_FILE" set 1 esp on
-parted -s "$IMAGE_FILE" mkpart primary btrfs 101MiB 100%
+parted -s "$IMAGE_FILE" mkpart primary btrfs 65MiB 100%
 
 echo "==> 设置 loop 设备..."
 LOOP_DEV=$(losetup -f --show -P "$IMAGE_FILE")
