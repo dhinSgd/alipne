@@ -32,7 +32,7 @@ IMAGE_SIZE="2G"  # 改为 2GB
 ### Q: 如何修改默认密码？
 A: 编辑 `scripts/02-build-rootfs.sh`，找到：
 ```bash
-echo "root:alipne123" | chpasswd
+echo "root:SlimAlpine123" | chpasswd
 ```
 改为你想要的密码。
 
@@ -128,7 +128,7 @@ A:
 
 ### Q: 默认密码安全吗？
 A: 
-**不安全！** 默认密码 `alipne123` 仅用于首次登录。
+**不安全！** 默认密码 `SlimAlpine123` 仅用于首次登录。
 **必须**在首次登录后立即修改：`passwd`
 
 ### Q: 如何加固安全？

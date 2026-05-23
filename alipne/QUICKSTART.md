@@ -31,7 +31,7 @@ make test
 ```bash
 # SSH 登录测试
 ssh -p 2222 root@localhost
-# 密码: alipne123
+# 密码: SlimAlpine123
 ```
 
 验证系统：

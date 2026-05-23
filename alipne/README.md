@@ -53,7 +53,7 @@ qemu-system-x86_64 \
 
 # SSH 登录测试
 ssh -p 2222 root@localhost
-# 默认密码: alipne123
+# 默认密码: SlimAlpine123
 ```
 
 ## 部署到阿里云
