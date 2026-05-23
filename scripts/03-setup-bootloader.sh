@@ -36,8 +36,11 @@ chroot "$MOUNT_POINT" /bin/sh <<'CHROOT_EOF'
 set -e
 
 # 安装 grub 到 EFI 分区
+# --no-nvram: 跳过 NVRAM 注册（构建环境无 EFI 变量）
+# --removable: 安装为默认 /EFI/BOOT/BOOTX64.EFI（云平台/任意 UEFI 固件可启动）
 grub-install --target=x86_64-efi --efi-directory=/boot/efi \
-    --bootloader-id=alipne --recheck --no-floppy
+    --bootloader-id=alipne --recheck --no-floppy \
+    --no-nvram --removable
 
 # 生成 grub 配置
 grub-mkconfig -o /boot/grub/grub.cfg
