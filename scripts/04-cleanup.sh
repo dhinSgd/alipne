@@ -53,7 +53,7 @@ if [ -d "$MODULES_DIR" ]; then
     mkdir -p "$TEMP_MODULES"
 
     # 保留 virtio 和必需的模块
-    cd "$MODULES_DIR"
+    (cd "$MODULES_DIR" && \
     find . -path "*/drivers/virtio/*" -o \
            -path "*/drivers/block/virtio_blk.ko*" -o \
            -path "*/drivers/net/virtio_net.ko*" -o \
@@ -67,7 +67,7 @@ if [ -d "$MODULES_DIR" ]; then
     while read module; do
         mkdir -p "$TEMP_MODULES/$(dirname "$module")"
         cp -a "$module" "$TEMP_MODULES/$module"
-    done
+    done)
 
     # 删除所有模块
     rm -rf "$MODULES_DIR/kernel"
@@ -92,7 +92,8 @@ df -h "$MOUNT_POINT"
 du -sh "$MOUNT_POINT"
 
 echo "==> 清理..."
-umount "$MOUNT_POINT"
+sync
+umount "$MOUNT_POINT" || umount -l "$MOUNT_POINT"
 losetup -d "$LOOP_DEV" || kpartx -d "$LOOP_DEV"
 rmdir "$MOUNT_POINT"
 
