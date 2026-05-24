@@ -77,11 +77,18 @@ jobs:
         path: output/alipne.raw
         retention-days: 30
 
-    - name: Upload QCOW2 image artifact (for local testing)
+    - name: Upload QCOW2 image artifact (compressed, for local testing)
       uses: actions/upload-artifact@v4
       with:
         name: alipne-qcow2-image
         path: output/alipne.qcow2
+        retention-days: 30
+
+    - name: Upload QCOW2 nocompress image artifact (uncompressed btrfs)
+      uses: actions/upload-artifact@v4
+      with:
+        name: alipne-qcow2-nocompress-image
+        path: output/alipne-nocompress.qcow2
         retention-days: 30
 
     - name: Create Release
@@ -99,14 +106,21 @@ jobs:
           ### 系统特性
           - Alpine Linux v3.20
           - UEFI/GPT 启动
-          - btrfs + zstd:3 压缩
+          - btrfs + zstd:3 压缩（可选）
           - zram 内存压缩 384MB (swappiness=80)
           - 系统占用 ~80-100 MB
           - 总可用内存 ~850-900 MB
 
-          ### 镜像格式
-          - **alipne.raw** - 用于阿里云导入（推荐）
-          - **alipne.qcow2** - 用于本地 QEMU 测试
+          ### 镜像格式（三个版本）
+          - **alipne.raw** - RAW 格式，**用于阿里云导入**（推荐）
+            - 带 btrfs zstd:3 压缩
+            - 镜像格式选择: RAW
+          - **alipne.qcow2** - QCOW2 格式，带 btrfs zstd:3 压缩
+            - 体积小（~200MB）
+            - 用于本地 QEMU 测试
+          - **alipne-nocompress.qcow2** - QCOW2 格式，无 btrfs 压缩
+            - 体积大但读写更快
+            - 适合性能优先场景
 
           ### 使用方法（阿里云）
           1. 下载 `alipne.raw`
@@ -134,6 +148,7 @@ jobs:
         files: |
           output/alipne.raw
           output/alipne.qcow2
+          output/alipne-nocompress.qcow2
         draft: false
         prerelease: false
       env:
