@@ -133,7 +133,35 @@ mount --bind /dev "$EXT4_MOUNT/dev"
 chroot "$EXT4_MOUNT" /bin/sh <<'CHROOT_EOF'
 set -e
 
-# 重新生成 initramfs（不含 btrfs）
+# 彻底移除 btrfs（用户空间工具）
+echo "     卸载 btrfs-progs..."
+apk del --no-progress btrfs-progs 2>/dev/null || true
+
+# 删除残留的 btrfs 内核模块文件
+echo "     删除 btrfs 内核模块..."
+find /lib/modules -type d -name btrfs -exec rm -rf {} + 2>/dev/null || true
+find /lib/modules -name 'btrfs*.ko*' -delete 2>/dev/null || true
+
+# 重建模块依赖表
+for k in /lib/modules/*; do
+    KVER=$(basename "$k")
+    depmod -a "$KVER" 2>/dev/null || true
+done
+
+# 验证：确认 btrfs 已彻底移除
+if find /lib/modules -name 'btrfs*' 2>/dev/null | grep -q .; then
+    echo "     ⚠ 警告：仍有 btrfs 模块残留"
+    find /lib/modules -name 'btrfs*'
+else
+    echo "     ✓ btrfs 模块已彻底移除"
+fi
+if [ -x /sbin/btrfs ] || [ -x /usr/sbin/btrfs ] || [ -x /bin/btrfs ]; then
+    echo "     ⚠ 警告：btrfs 用户工具仍存在"
+else
+    echo "     ✓ btrfs 用户工具已移除"
+fi
+
+# 重新生成 initramfs（mkinitfs.conf 已配置为只含 ext4）
 for k in /lib/modules/*; do
     KVER=$(basename "$k")
     echo "     mkinitfs: $KVER"
