@@ -201,6 +201,13 @@ chmod 700 /root/.ssh
 # 配置时区
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
+# 重新生成 initramfs（确保包含 btrfs 等模块，覆盖默认 mkinitfs 输出）
+for k in /lib/modules/*; do
+    KVER=$(basename "$k")
+    echo "  重新生成 initramfs: $KVER"
+    mkinitfs "$KVER"
+done
+
 echo "✓ 系统配置完成"
 CHROOT_EOF
 

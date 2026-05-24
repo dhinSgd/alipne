@@ -34,6 +34,8 @@ apt-get install -y \
     qemu-system-x86 \
     btrfs-progs \
     dosfstools \
+    e2fsprogs \
+    rsync \
     parted \
     grub-efi-amd64-bin \
     ovmf \

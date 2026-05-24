@@ -1,8 +1,8 @@
 #!/bin/bash
 # 05-pack-image.sh - 打包镜像（三个版本）
-# 1. alipne.raw                  - RAW 格式（btrfs zstd:3 压缩，用于阿里云）
-# 2. alipne.qcow2                - QCOW2 格式（btrfs zstd:3 压缩，用于本地测试）
-# 3. alipne-nocompress.qcow2     - QCOW2 格式（btrfs 无压缩，体积大但读写快）
+# 1. alipne.raw                  - RAW 格式，btrfs + zstd:3 压缩（用于阿里云）
+# 2. alipne.qcow2                - QCOW2 格式，btrfs + zstd:3 压缩（用于本地测试）
+# 3. alipne-nocompress.qcow2     - QCOW2 格式，ext4 文件系统（性能优先）
 
 set -e
 
@@ -11,16 +11,18 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 OUTPUT_DIR="$PROJECT_DIR/output"
 
 RAW_IMAGE="$OUTPUT_DIR/alipne.raw"
-RAW_NOCOMPRESS="$OUTPUT_DIR/alipne-nocompress.raw"
+EXT4_RAW="$OUTPUT_DIR/alipne-nocompress.raw"
 QCOW2_IMAGE="$OUTPUT_DIR/alipne.qcow2"
 QCOW2_NOCOMPRESS="$OUTPUT_DIR/alipne-nocompress.qcow2"
 
-MOUNT_BASE="/tmp/alipne-decompress-$$"
+EXT4_SIZE="990M"
+
+BTRFS_MOUNT="/tmp/alipne-btrfs-$$"
+EXT4_MOUNT="/tmp/alipne-ext4-$$"
 
 echo "==> 镜像打包（三个版本）"
 echo ""
 
-# 检查源 raw 镜像
 if [ ! -f "$RAW_IMAGE" ]; then
     echo "错误: RAW 镜像不存在: $RAW_IMAGE"
     exit 1
@@ -31,91 +33,154 @@ ls -lh "$RAW_IMAGE"
 echo ""
 
 # ==========================================
-# 版本 1: alipne.qcow2 (带 btrfs 压缩)
+# 版本 1: alipne.qcow2 (btrfs + zstd:3 压缩)
 # ==========================================
-echo "==> [1/3] 生成 alipne.qcow2（带 btrfs zstd:3 压缩）..."
+echo "==> [1/3] 生成 alipne.qcow2（btrfs + zstd:3 压缩）..."
 rm -f "$QCOW2_IMAGE"
-qemu-img convert -f raw -O qcow2 -c \
-    "$RAW_IMAGE" "$QCOW2_IMAGE"
+qemu-img convert -f raw -O qcow2 -c "$RAW_IMAGE" "$QCOW2_IMAGE"
 echo "  ✓ 已生成: $(ls -lh "$QCOW2_IMAGE" | awk '{print $5}')"
 echo ""
 
 # ==========================================
-# 版本 2: alipne-nocompress.qcow2 (无 btrfs 压缩)
+# 版本 2: alipne-nocompress.qcow2 (ext4 文件系统)
 # ==========================================
-echo "==> [2/3] 生成 alipne-nocompress.qcow2（无 btrfs 压缩）..."
+echo "==> [2/3] 生成 alipne-nocompress.qcow2（ext4 文件系统，无 btrfs）..."
 
-# 复制原 raw 镜像
-echo "  复制 raw 镜像..."
-cp "$RAW_IMAGE" "$RAW_NOCOMPRESS"
+# --- 创建空白 ext4 镜像 ---
+echo "  -> 创建空白镜像 ($EXT4_SIZE)..."
+rm -f "$EXT4_RAW"
+qemu-img create -f raw "$EXT4_RAW" "$EXT4_SIZE"
 
-# 挂载镜像
-echo "  挂载镜像..."
-LOOP_DEV=$(losetup -f --show -P "$RAW_NOCOMPRESS")
-echo "  Loop 设备: $LOOP_DEV"
+echo "  -> 创建 GPT 分区表..."
+parted -s "$EXT4_RAW" mklabel gpt
+parted -s "$EXT4_RAW" mkpart primary fat32 1MiB 65MiB
+parted -s "$EXT4_RAW" set 1 esp on
+parted -s "$EXT4_RAW" mkpart primary ext4 65MiB 100%
 
+echo "  -> 挂载 loop 设备..."
+EXT4_LOOP=$(losetup -f --show -P "$EXT4_RAW")
+echo "     Loop: $EXT4_LOOP"
 sleep 2
-if [ ! -e "${LOOP_DEV}p2" ]; then
-    kpartx -a "$LOOP_DEV"
-    sleep 1
-fi
+[ ! -e "${EXT4_LOOP}p2" ] && { kpartx -a "$EXT4_LOOP"; sleep 1; }
 
-# 解压缩函数：挂载子卷并重写所有文件
-decompress_subvol() {
-    local subvol="$1"
-    local mount_target="$2"
+echo "  -> 格式化分区..."
+mkfs.fat -F32 -n EFI "${EXT4_LOOP}p1" >/dev/null
+mkfs.ext4 -q -F -L alipne "${EXT4_LOOP}p2"
 
-    echo "  -> 处理子卷 $subvol..."
-    mkdir -p "$mount_target"
+# --- 挂载源 btrfs 镜像（只读）---
+echo "  -> 挂载源 btrfs 镜像..."
+BTRFS_LOOP=$(losetup -f --show -P "$RAW_IMAGE")
+echo "     Loop: $BTRFS_LOOP"
+sleep 2
+[ ! -e "${BTRFS_LOOP}p2" ] && { kpartx -a "$BTRFS_LOOP"; sleep 1; }
 
-    # 使用 compress=no 挂载
-    mount -o "subvol=$subvol,compress=no,noatime" "${LOOP_DEV}p2" "$mount_target"
+mkdir -p "$BTRFS_MOUNT"
+mount -o "subvol=@,ro" "${BTRFS_LOOP}p2" "$BTRFS_MOUNT"
+mkdir -p "$BTRFS_MOUNT/home" "$BTRFS_MOUNT/var/log" "$BTRFS_MOUNT/boot/efi"
+mount -o "subvol=@home,ro" "${BTRFS_LOOP}p2" "$BTRFS_MOUNT/home" 2>/dev/null || true
+mount -o "subvol=@var_log,ro" "${BTRFS_LOOP}p2" "$BTRFS_MOUNT/var/log" 2>/dev/null || true
+mount -o ro "${BTRFS_LOOP}p1" "$BTRFS_MOUNT/boot/efi"
 
-    # 设置子卷不压缩属性
-    btrfs property set "$mount_target" compression none 2>/dev/null || true
+# --- 挂载目标 ext4 镜像 ---
+echo "  -> 挂载目标 ext4 镜像..."
+mkdir -p "$EXT4_MOUNT"
+mount "${EXT4_LOOP}p2" "$EXT4_MOUNT"
+mkdir -p "$EXT4_MOUNT/boot/efi"
+mount "${EXT4_LOOP}p1" "$EXT4_MOUNT/boot/efi"
 
-    # 遍历所有文件，重写以解压缩
-    local total=$(find "$mount_target" -type f -size +0c 2>/dev/null | wc -l)
-    echo "     找到 $total 个文件需要重写"
+# --- rsync 文件 ---
+echo "  -> rsync 文件到 ext4..."
+rsync -aHAX --numeric-ids --info=stats1 \
+    --exclude='/proc/*' --exclude='/sys/*' --exclude='/dev/*' \
+    --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' \
+    --exclude='/.snapshots' \
+    "$BTRFS_MOUNT/" "$EXT4_MOUNT/"
 
-    find "$mount_target" -type f -size +0c -print0 2>/dev/null | while IFS= read -r -d '' f; do
-        # 重写文件以应用新的压缩设置（即不压缩）
-        if cp --preserve=all "$f" "${f}.tmp" 2>/dev/null; then
-            mv -f "${f}.tmp" "$f" 2>/dev/null || rm -f "${f}.tmp"
-        fi
-    done
+echo "  -> rsync EFI 分区..."
+rsync -aHAX --numeric-ids "$BTRFS_MOUNT/boot/efi/" "$EXT4_MOUNT/boot/efi/"
 
-    # 同步并卸载
-    sync
-    umount "$mount_target"
-    rmdir "$mount_target"
-}
+# --- 获取新 UUID ---
+EXT4_ROOT_UUID=$(blkid -s UUID -o value "${EXT4_LOOP}p2")
+EXT4_EFI_UUID=$(blkid -s UUID -o value "${EXT4_LOOP}p1")
+echo "  -> 新 Root UUID: $EXT4_ROOT_UUID"
+echo "  -> 新 EFI UUID:  $EXT4_EFI_UUID"
 
-# 处理三个子卷
-decompress_subvol "@" "${MOUNT_BASE}-root"
-decompress_subvol "@home" "${MOUNT_BASE}-home"
-decompress_subvol "@var_log" "${MOUNT_BASE}-varlog"
+# --- 重写 fstab（ext4，无子卷） ---
+echo "  -> 重写 fstab..."
+cat > "$EXT4_MOUNT/etc/fstab" <<FSTAB
+# /etc/fstab - 文件系统挂载表（ext4 版本）
 
-# 同步并释放 loop 设备
-sync
-losetup -d "$LOOP_DEV" 2>/dev/null || kpartx -d "$LOOP_DEV" 2>/dev/null || true
-echo "  ✓ 解压缩完成"
+UUID=$EXT4_ROOT_UUID  /          ext4   defaults,noatime,errors=remount-ro  0  1
+UUID=$EXT4_EFI_UUID   /boot/efi  vfat   defaults,noatime                    0  2
 
-# 转换为 qcow2
-echo "  转换为 qcow2..."
+tmpfs                 /tmp       tmpfs  defaults,size=128M,mode=1777        0  0
+tmpfs                 /run       tmpfs  defaults,size=64M                   0  0
+FSTAB
+
+# --- 重写 mkinitfs.conf（不需要 btrfs） ---
+echo "  -> 重写 mkinitfs.conf..."
+mkdir -p "$EXT4_MOUNT/etc/mkinitfs"
+cat > "$EXT4_MOUNT/etc/mkinitfs/mkinitfs.conf" <<'MKINITFS'
+features="ata base ide scsi usb virtio nvme ext4"
+MKINITFS
+
+# --- chroot 重新生成 initramfs 和重装 grub ---
+echo "  -> chroot 重装 grub 和 initramfs..."
+mount -t proc proc "$EXT4_MOUNT/proc"
+mount -t sysfs sys "$EXT4_MOUNT/sys"
+mount --bind /dev "$EXT4_MOUNT/dev"
+
+chroot "$EXT4_MOUNT" /bin/sh <<'CHROOT_EOF'
+set -e
+
+# 重新生成 initramfs（不含 btrfs）
+for k in /lib/modules/*; do
+    KVER=$(basename "$k")
+    echo "     mkinitfs: $KVER"
+    mkinitfs "$KVER"
+done
+
+# 重新安装 grub（指向新 UUID）
+grub-install --target=x86_64-efi --efi-directory=/boot/efi \
+    --bootloader-id=alipne --recheck --no-floppy \
+    --no-nvram --removable >/dev/null
+
+# 重新生成 grub 配置（自动读取新 UUID）
+grub-mkconfig -o /boot/grub/grub.cfg 2>&1 | tail -3
+CHROOT_EOF
+
+# --- 清理 ---
+echo "  -> 清理挂载点..."
+umount "$EXT4_MOUNT/dev"
+umount "$EXT4_MOUNT/sys"
+umount "$EXT4_MOUNT/proc"
+umount "$EXT4_MOUNT/boot/efi"
+umount "$EXT4_MOUNT"
+
+umount "$BTRFS_MOUNT/boot/efi" 2>/dev/null || true
+umount "$BTRFS_MOUNT/var/log" 2>/dev/null || true
+umount "$BTRFS_MOUNT/home" 2>/dev/null || true
+umount "$BTRFS_MOUNT"
+
+losetup -d "$EXT4_LOOP" 2>/dev/null || kpartx -d "$EXT4_LOOP" 2>/dev/null || true
+losetup -d "$BTRFS_LOOP" 2>/dev/null || kpartx -d "$BTRFS_LOOP" 2>/dev/null || true
+
+rmdir "$BTRFS_MOUNT" "$EXT4_MOUNT" 2>/dev/null || true
+
+# --- 转换为 qcow2 ---
+echo "  -> 转换为 qcow2..."
 rm -f "$QCOW2_NOCOMPRESS"
-qemu-img convert -f raw -O qcow2 -c \
-    "$RAW_NOCOMPRESS" "$QCOW2_NOCOMPRESS"
+qemu-img convert -f raw -O qcow2 -c "$EXT4_RAW" "$QCOW2_NOCOMPRESS"
 echo "  ✓ 已生成: $(ls -lh "$QCOW2_NOCOMPRESS" | awk '{print $5}')"
 
-# 删除中间 raw 文件
-rm -f "$RAW_NOCOMPRESS"
+# 删除中间 raw
+rm -f "$EXT4_RAW"
 echo ""
 
 # ==========================================
 # 版本 3: alipne.raw (已存在)
 # ==========================================
-echo "==> [3/3] 保留 alipne.raw（用于阿里云）..."
+echo "==> [3/3] 保留 alipne.raw（btrfs，用于阿里云）..."
 echo "  ✓ 已存在: $(ls -lh "$RAW_IMAGE" | awk '{print $5}')"
 echo ""
 
@@ -133,18 +198,18 @@ echo ""
 
 echo "镜像信息:"
 echo ""
-echo "[1] alipne.raw (用于阿里云导入):"
+echo "[1] alipne.raw (btrfs + zstd:3，用于阿里云导入):"
 qemu-img info "$RAW_IMAGE" | head -5
 echo ""
-echo "[2] alipne.qcow2 (带 btrfs 压缩，体积小):"
+echo "[2] alipne.qcow2 (btrfs + zstd:3，体积小):"
 qemu-img info "$QCOW2_IMAGE" | head -5
 echo ""
-echo "[3] alipne-nocompress.qcow2 (无 btrfs 压缩，读写快):"
+echo "[3] alipne-nocompress.qcow2 (ext4 文件系统，读写快):"
 qemu-img info "$QCOW2_NOCOMPRESS" | head -5
 echo ""
 
 echo "使用建议:"
 echo "  - 阿里云导入:    使用 alipne.raw（镜像格式选 RAW）"
-echo "  - 本地测试:      使用 alipne.qcow2（体积小，加载稍慢）"
-echo "  - 性能优先:      使用 alipne-nocompress.qcow2（体积大，读写快）"
+echo "  - 本地测试:      使用 alipne.qcow2（btrfs 压缩，体积小）"
+echo "  - 性能优先:      使用 alipne-nocompress.qcow2（ext4 文件系统）"
 echo ""

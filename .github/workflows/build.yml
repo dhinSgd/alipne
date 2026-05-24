@@ -113,13 +113,15 @@ jobs:
 
           ### 镜像格式（三个版本）
           - **alipne.raw** - RAW 格式，**用于阿里云导入**（推荐）
-            - 带 btrfs zstd:3 压缩
+            - btrfs + zstd:3 压缩
             - 镜像格式选择: RAW
-          - **alipne.qcow2** - QCOW2 格式，带 btrfs zstd:3 压缩
+          - **alipne.qcow2** - QCOW2 格式
+            - btrfs + zstd:3 压缩
             - 体积小（~200MB）
             - 用于本地 QEMU 测试
-          - **alipne-nocompress.qcow2** - QCOW2 格式，无 btrfs 压缩
-            - 体积大但读写更快
+          - **alipne-nocompress.qcow2** - QCOW2 格式
+            - **ext4 文件系统**（无 btrfs）
+            - 启动快、读写性能好
             - 适合性能优先场景
 
           ### 使用方法（阿里云）
