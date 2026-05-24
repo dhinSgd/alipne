@@ -56,11 +56,9 @@ if [ -d "$MODULES_DIR" ]; then
             [[ "$pattern" =~ ^#.*$ ]] && continue
             [[ -z "$pattern" ]] && continue
 
-            # 删除匹配的模块（目录或文件）
-            TARGET="$MODULES_DIR/kernel/$pattern"
-            if [ -e "$TARGET" ]; then
+            # 使用 find 查找并删除匹配的模块（支持目录和文件）
+            if find "$MODULES_DIR/kernel" -path "*/$pattern" -print -delete 2>/dev/null | grep -q .; then
                 echo "  删除: $pattern"
-                rm -rf "$TARGET"
                 DELETED_COUNT=$((DELETED_COUNT + 1))
             fi
         done < "$BLACKLIST_FILE"
@@ -68,7 +66,9 @@ if [ -d "$MODULES_DIR" ]; then
         # 重新生成模块依赖
         if [ $DELETED_COUNT -gt 0 ]; then
             echo "  已删除 $DELETED_COUNT 项，重新生成依赖..."
-            depmod -b "$MOUNT_POINT" "$KERNEL_VERSION"
+            if ! depmod -b "$MOUNT_POINT" "$KERNEL_VERSION" 2>&1; then
+                echo "⚠ depmod 警告（可忽略）"
+            fi
             echo "✓ 内核模块清理完成"
         else
             echo "✓ 未找到需要删除的模块"
@@ -79,7 +79,14 @@ if [ -d "$MODULES_DIR" ]; then
 fi
 
 echo "==> btrfs 碎片整理和重新压缩..."
-btrfs filesystem defragment -r -czstd "$MOUNT_POINT"
+if ! btrfs filesystem defragment -r -czstd "$MOUNT_POINT" 2>&1; then
+    echo "⚠ btrfs 碎片整理警告（可忽略）"
+fi
+
+echo "==> btrfs 空间回收..."
+if ! btrfs balance start -dusage=50 "$MOUNT_POINT" 2>&1; then
+    echo "⚠ btrfs balance 警告（可忽略）"
+fi
 
 echo "==> 显示磁盘使用情况..."
 df -h "$MOUNT_POINT"

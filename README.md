@@ -71,7 +71,7 @@ passwd
 ## 系统架构
 
 ```
-物理 RAM 0.5G + zram swap 500MB = 总可用 ~1GB
+物理 RAM 0.5G + zram swap 384MB = 总可用 ~1GB
 /dev/vda (1G, GPT)
 ├── vda1: 100MB FAT32 (EFI)
 └── vda2: 900MB btrfs (zstd:3, noatime)

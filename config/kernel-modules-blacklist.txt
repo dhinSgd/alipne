@@ -15,9 +15,6 @@ net/bluetooth/
 # 无线网卡（服务器用有线）
 drivers/net/wireless/
 
-# 物理网卡驱动（虚拟化环境用 virtio-net）
-drivers/net/ethernet/
-
 # 输入设备（键盘/鼠标/触摸板，服务器不需要）
 drivers/input/keyboard/
 drivers/input/mouse/
@@ -54,4 +51,4 @@ drivers/watchdog/
 drivers/pci/hotplug/
 
 # 内存气球（固定内存 ECS 不需要动态内存管理）
-drivers/virtio/virtio_balloon.ko
+drivers/virtio/virtio_balloon.ko*
