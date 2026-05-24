@@ -10,7 +10,7 @@ OVERLAY_DIR="$PROJECT_DIR/overlay"
 CONFIG_DIR="$PROJECT_DIR/config"
 
 IMAGE_FILE="$OUTPUT_DIR/alipne.raw"
-IMAGE_SIZE="1G"
+IMAGE_SIZE="990M"
 MOUNT_POINT="/tmp/alipne-build-$$"
 
 echo "==> 创建空白镜像文件 ($IMAGE_SIZE)..."
